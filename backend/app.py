@@ -81,20 +81,21 @@ def signin():
             'email': existing_user['email'],
             'city': existing_user['city'],
             'profession': existing_user['profession'],
-            'name': existing_user['name']
+            'name': existing_user['name'],
+             'role':0
         }
     }
     resp = make_response(jsonify(resp_data))
-    resp.set_cookie('user', token)
+    resp.set_cookie('token', token)
 
     return resp, 200
 
 #signout route    
-@app.route('/api/user/signout', methods=['GET'])
+@app.route('/api/signout', methods=['GET'])
 def signout():
 
     resp = make_response(jsonify({'status': 'success', 'message': 'Signout successful'}))
-    resp.delete_cookie('user')  # Delete the token cookie
+    resp.delete_cookie('token')  # Delete the token cookie
 
     return resp
 
@@ -159,26 +160,27 @@ def community_manager_signin():
     resp_data = {
         'status': 'success',
         'message': 'Signin successful',
-        'comminty_manager': {
+        'community_manager': {
             '_id': user_id,
             'email': existing_user['email'],
             'city': existing_user['city'],
-            'name': existing_user['name']
+            'name': existing_user['name'],
+            'role':1
         }
     }
     resp = make_response(jsonify(resp_data))
-    resp.set_cookie('community-manager', token)
+    resp.set_cookie('token', token)
 
     return resp, 200
 
-#signout community-manager route    
-@app.route('/api/community_manager/signout', methods=['GET'])
-def community_manager_signout():
+# #signout community-manager route    
+# @app.route('/api/community_manager/signout', methods=['GET'])
+# def community_manager_signout():
 
-    resp = make_response(jsonify({'status': 'success', 'message': 'Signout successful'}))
-    resp.delete_cookie('community-manager')  # Delete the token cookie
+#     resp = make_response(jsonify({'status': 'success', 'message': 'Signout successful'}))
+#     resp.delete_cookie('community-manager')  # Delete the token cookie
 
-    return resp
+#     return resp
 
 
 #create quest
