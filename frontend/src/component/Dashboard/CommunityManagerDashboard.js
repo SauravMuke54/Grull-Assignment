@@ -2,9 +2,11 @@ import React,{useEffect, useState} from 'react'
 import CreateQuest from '../CreateQuest/CreateQuest'
 import MyQuests from '../MyQuests/MyQuests'
 import CommunityManagerProfile from '../CommunityManagerProfile/CommunityManagerProfile'
+import { isAuthenticated } from '../../helper'
 
 export default function CommunityManagerDashboard() {
    const [flag,setFlag]=useState(0)
+   console.log(isAuthenticated())
 
    const renderComponent=()=>{
 

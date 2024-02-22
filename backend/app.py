@@ -181,6 +181,50 @@ def community_manager_signin():
 #     resp.delete_cookie('community-manager')  # Delete the token cookie
 
 #     return resp
+@app.route('/api/get/quests', methods=['POST'])
+@cross_origin()
+def get_quest():
+    req = request.get_json()
+    manager_id = req.get('manager_id')  # Use .get() to safely access the 'manager_id' key
+    quests = mongo.db.quests.find({'manager_id': manager_id})
+    
+    # Convert ObjectId fields to strings
+    quests_list = []
+    for quest in quests:
+        quest['_id'] = str(quest['_id'])  # Convert ObjectId to string
+        quests_list.append(quest)
+
+
+    quests_list.reverse()
+
+    if not quests_list:
+        return jsonify({'status': 'error', 'message': 'No quest found'}), 400
+
+    response = {'status': 'success', 'quests': quests_list}
+    return jsonify(response), 200
+
+
+@app.route('/api/get-all/quests', methods=['GET'])
+@cross_origin()
+def get_all_quest():
+    
+    quests = mongo.db.quests.find({})
+    
+    # Convert ObjectId fields to strings
+    quests_list = []
+    for quest in quests:
+        quest['_id'] = str(quest['_id'])  # Convert ObjectId to string
+        quests_list.append(quest)
+
+
+    quests_list.reverse()
+
+    if not quests_list:
+        return jsonify({'status': 'error', 'message': 'No quest found'}), 400
+
+    response = {'status': 'success', 'quests': quests_list}
+    return jsonify(response), 200
+
 
 
 #create quest
@@ -203,7 +247,7 @@ def create_quest():
     if not all([activity, leisure_activity,local_events,start_date,end_date,location,manager_id]):
         return jsonify({'status': 'error', 'message': 'Missing some data'}), 400
 
-    quest.insert_one({'activity':activity,'leisure_activity':leisure_activity,'local_events':local_events,'start_date':start_date,'end_date':end_date,'location':location})
+    quest.insert_one({'activity':activity,'leisure_activity':leisure_activity,'local_events':local_events,'start_date':start_date,'end_date':end_date,'location':location,'manager_id':manager_id})
 
     response ={'status':'success',"message":"Queest added succesfully"}
     
