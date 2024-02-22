@@ -20,60 +20,68 @@ export default function CreateQuest() {
     const [start_date,setStartDate]=useState("")
     const [end_date,setEndDate]=useState("")
     const [location,setLocation]=useState("")
+    const [loading,setLoading]=useState("")
 
-    const sendData=async()=>{
-
-        if(activityImage){
-        const data= new FormData()
-        data.append('file',activityImage)
-        data.append('upload_preset',"er103mfg")
-        data.append('cloud_name','dlpcihcmz')
-
-        
-        await axios.post('https://api.cloudinary.com/v1_1/dlpcihcmz/image/upload',data).then(response=>{
-            
-            setUrl1(response.data.url)
-        })
-        }
-
-
-        if(outdoorImage){
-            const data= new FormData()
-            data.append('file',outdoorImage)
-            data.append('upload_preset',"er103mfg")
-            data.append('cloud_name','dlpcihcmz')
+    const sendData = async () => {
+        try {
+            setLoading("Loading.....")
+            if (activityImage) {
+                const activityData = new FormData();
+                activityData.append('file', activityImage);
+                activityData.append('upload_preset', "er103mfg");
+                activityData.append('cloud_name', 'dlpcihcmz');
     
-            
-            await axios.post('https://api.cloudinary.com/v1_1/dlpcihcmz/image/upload',data).then(response=>{
-                
-                setUrl2(response.data.url)
-            })
+                const activityResponse = await axios.post('https://api.cloudinary.com/v1_1/dlpcihcmz/image/upload', activityData);
+                const url1 = activityResponse.data.url;
+    
+                if (outdoorImage) {
+                    const outdoorData = new FormData();
+                    outdoorData.append('file', outdoorImage);
+                    outdoorData.append('upload_preset', "er103mfg");
+                    outdoorData.append('cloud_name', 'dlpcihcmz');
+    
+                    const outdoorResponse = await axios.post('https://api.cloudinary.com/v1_1/dlpcihcmz/image/upload', outdoorData);
+                    const url2 = outdoorResponse.data.url;
+    
+                    await axios.post(`${BAPI}/create/quest`, {
+                        activity: {
+                            activityName,
+                            activityDescription,
+                            url: url1
+                        },
+                        leisure_activity: {
+                            outdoorName,
+                            outdoorDescription,
+                            url: url2
+                        },
+                        local_events: {
+                            eventName,
+                            eventDescritption
+                        },
+                        start_date,
+                        end_date,
+                        location,
+                        manager_id: isAuthenticated().data?.community_manager?._id
+                    });
+    
+                    setSuccess("Quest created successfully");
+                    setLoading("")
+                    setError("");
+                }
             }
-
+        } catch (error) {
+            setSuccess("");
+            setError("Error in adding quest");
+            setLoading("")
+            console.error("Error:", error);
+        }
+    };
     
-          await  axios.post(`${BAPI}/create/quest`,{
-                activity:{
-                    activityName,activityDescription,url1
-                },leisure_activity:{
-                    outdoorName,outdoorDescription,url2
-                },local_events:{
-                    eventName,eventDescritption
-                },start_date,end_date,location,manager_id:isAuthenticated().data?.community_manager?._id
-            }).then((response)=>{
-                // console.log(response.data)
-                setSuccess("Quest created successfully")
-                setError("")
-                
-            }).catch(err=>{
-                setSuccess("")
-                setError("Error in adding quest")
-            })
-
-
-    }
-
   return (
     <div style={{font:'initial'}}>
+        {loading && <div class="spinner-border" role="status">
+  <span class="sr-only">Loading...</span>
+</div>}
       { success &&  <div class="alert alert-success" role="alert">
 {success}
 </div>}
