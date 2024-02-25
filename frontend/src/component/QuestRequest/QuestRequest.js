@@ -42,13 +42,13 @@ export default function QuestRequest() {
   const viewDetails=(data)=>{
     navigate('/quest-details',{state:{data:data.quest_data}})
   }
-console.log(isAuthenticated())
+
   const getData=async()=>{
     await axios.post(`${BAPI}/get-manager-quests`,{
       'manager_id':isAuthenticated().data?.community_manager?._id
     }).then((response)=>{
       setQuests(response.data.manager_quests)
-      console.log(quests)
+    
     }).catch(err=>{
       console.log(err)
     })
@@ -56,7 +56,7 @@ console.log(isAuthenticated())
 
   useEffect(()=>{
     getData()
-  },[acceptQuestRequest,rejectQuestRequest])
+  },[])
 
 
   return (
