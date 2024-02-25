@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, m
 from flask_pymongo import PyMongo
 import bcrypt
 import hashlib
+from bson import ObjectId
 from flask_cors import CORS,cross_origin
 
 app = Flask(__name__)
@@ -252,6 +253,122 @@ def create_quest():
     response ={'status':'success',"message":"Queest added succesfully"}
     
     return jsonify(response),200
+
+@app.route('/api/get-manager-details', methods=['POST'])
+@cross_origin()
+def get_manager():
+    req = request.get_json()
+    manager_id = req.get('manager_id')
+
+    if not ObjectId.is_valid(manager_id):
+        return jsonify({'status': 'error', 'message': 'Invalid manager ID'}), 400
+
+    manager = mongo.db.community_manager.find_one({'_id': ObjectId(manager_id)})
+
+    if not manager:
+        return jsonify({'status': 'error', 'message': 'Manager not found'}), 404
+
+    email = manager['email']
+    name = manager['name']
+    city = manager['city']
+    
+    # Construct a dictionary with manager details
+    manager_details = {
+        'email': email,
+        'name': name,
+        'city': city
+    }
+
+    # Return the manager details in a JSON response
+    return jsonify({'status': 'success', 'manager': manager_details}), 200
+
+@app.route('/api/get-user-quests', methods=['POST'])
+@cross_origin()
+def user_quests():
+    req = request.get_json()
+    user_id = req.get('user_id')
+
+    if not ObjectId.is_valid(user_id):
+        return jsonify({'status': 'error', 'message': 'Invalid user ID'}), 400
+
+    # Find user quests and convert the Cursor to a list of dictionaries
+    user_quests_cursor = mongo.db.book_quest.find({'user_id': user_id})
+    user_quests = list(user_quests_cursor)
+    
+    if not user_quests:
+        return jsonify({'status': 'error', 'message': 'Quests not found'}), 404
+
+    # Convert ObjectId to string for JSON serialization
+    for quest in user_quests:
+        quest['_id'] = str(quest['_id'])
+
+    # Return the user quests in a JSON response
+    return jsonify({'status': 'success', 'user_quests': user_quests}), 200
+
+@app.route('/api/get-manager-quests', methods=['POST'])
+@cross_origin()
+def manager_quests():
+    req = request.get_json()
+    manager_id = req.get('manager_id')
+
+    if not ObjectId.is_valid(manager_id):
+        return jsonify({'status': 'error', 'message': 'Invalid user ID'}), 400
+
+    # Find user quests and convert the Cursor to a list of dictionaries
+    manager_quests_cursor = mongo.db.book_quest.find({'manager_id': manager_id})
+    manager_quests = list(manager_quests_cursor)
+    
+    if not manager_quests:
+        return jsonify({'status': 'error', 'message': 'Quests not found'}), 404
+
+    # Convert ObjectId to string for JSON serialization
+    for quest in manager_quests:
+        quest['_id'] = str(quest['_id'])
+
+    # Return the user quests in a JSON response
+    return jsonify({'status': 'success', 'manager_quests':manager_quests}), 200
+
+
+@app.route('/api/update-quest-status', methods=['POST'])
+@cross_origin()
+def quest_status():
+    req = request.get_json()
+    _id = req.get('_id')
+    status = req.get('status')
+
+    if not ObjectId.is_valid(_id):
+        return jsonify({'status': 'error', 'message': 'Invalid quest ID'}), 400
+
+    # Update the quest status in the database
+    result = mongo.db.book_quest.find_one_and_update(
+        {'_id': ObjectId(_id)},
+        {'$set': {'status': status}},
+        return_document=True  # Return the updated document
+    )
+
+    if not result:
+        return jsonify({'status': 'error', 'message': 'Quest not found'}), 404
+
+    # Return the updated quest details
+    return jsonify({'status': 'success', 'message':'Successfully updates status' }), 200
+
+
+
+@app.route('/api/book-quest', methods=['POST'])
+@cross_origin()
+def book_quest():
+    req = request.get_json()
+    manager_id = req.get('manager_id')
+    quest_id = req.get('quest_id')
+    user_id = req.get('user_id')
+    quest_data = req.get('quest_data')
+
+    if mongo.db.book_quest.find_one({'quest_id':quest_id,'user_id':user_id,'manager_id':manager_id}):
+        return jsonify({'status': 'error', 'message': 'Already Pending Request'}), 400
+
+    mongo.db.book_quest.insert_one({'manager_id':manager_id,'quest_id':quest_id,'user_id':user_id,'status':'Pending','quest_data':quest_data})    
+    # Return the manager details in a JSON response
+    return jsonify({'status': 'success', 'message': 'Done Sending Request'}), 200
 
 
 if __name__ == '__main__':

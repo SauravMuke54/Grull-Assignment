@@ -21,7 +21,7 @@ export default function UserDashboard() {
 
     },[])
     return (
-        <div className='container'>
+        <div className='container shadow shadow-md'>
         <center className='mt-5 ' style={{font:'initial'}}><h1>User Dashboard</h1></center>
         <div className="row border border-dark p-2">
         <div className="col-lg-2 border border-top-0 border-left-0 border-bottom-0 border-right-3 border-black">

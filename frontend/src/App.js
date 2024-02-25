@@ -10,6 +10,7 @@ import UserDashboard from "./component/Dashboard/UserDashboard";
 import PrivateRoute from "./helper/PrivateRoute";
 import AdminRoute from "./helper/AdminRoute";
 import CommunityManagerDashboard from "./component/Dashboard/CommunityManagerDashboard";
+import QuestDetails from "./component/QuestDetails/QuestDetails";
 
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
         
         <Route path="/community/signin" element={<CommunitySignin/>}/>
         <Route path="/user/dashboard" element={<PrivateRoute><UserDashboard/></PrivateRoute>}/>
+        <Route path="/quest-details" element={<PrivateRoute><QuestDetails/></PrivateRoute>}/>
         <Route path="/community/dashboard" element={<AdminRoute><CommunityManagerDashboard/></AdminRoute>}/>
 
       </Routes>
