@@ -4,6 +4,8 @@ import bcrypt
 import hashlib
 from bson import ObjectId
 from flask_cors import CORS,cross_origin
+from fuzzywuzzy import fuzz
+
 
 app = Flask(__name__)
 CORS(app)
@@ -370,6 +372,43 @@ def book_quest():
     # Return the manager details in a JSON response
     return jsonify({'status': 'success', 'message': 'Done Sending Request'}), 200
 
+@app.route('/api/get-relevant-quests', methods=['POST'])
+@cross_origin()
+def relevant_quest():
+    req = request.get_json()
+    query = req.get('query')
+    # Split the query into tokens (words)
+    query_tokens = set(query.lower().split())
 
+    results = mongo.db.quests.find({})
+
+    relevant_lists = []
+
+    for data in results:
+        # Concatenate relevant fields into a single string
+        paragraph = (
+            data['activity']['activityName'] + " " +
+            data['activity']['activityDescription'] + " " +
+            data['leisure_activity']['outdoorName'] + " " +
+            data['leisure_activity']['outdoorDescription'] + " " +
+            data['local_events']['eventName'] + " " +
+            data['local_events']['eventDescritption'] + " " +
+            data['location']
+        )
+        
+        # Split the paragraph into tokens (words)
+        paragraph_tokens = set(paragraph.lower().split())
+
+        # Calculate Jaccard similarity between query tokens and paragraph tokens
+        jaccard_similarity = len(query_tokens.intersection(paragraph_tokens)) / len(query_tokens.union(paragraph_tokens))
+        
+        if jaccard_similarity >= 0.01:  # You can adjust the threshold as needed
+            relevant_lists.append(data)
+
+    for data in relevant_lists:
+        data['_id'] = str(data['_id'])
+
+    return jsonify({'status': 'success', 'relevant_lists': relevant_lists}), 200
+    
 if __name__ == '__main__':
     app.run(debug=True)

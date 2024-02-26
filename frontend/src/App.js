@@ -11,6 +11,7 @@ import PrivateRoute from "./helper/PrivateRoute";
 import AdminRoute from "./helper/AdminRoute";
 import CommunityManagerDashboard from "./component/Dashboard/CommunityManagerDashboard";
 import QuestDetails from "./component/QuestDetails/QuestDetails";
+import SearchedQuest from "./component/SearchedQuest/SearchedQuest";
 
 
 function App() {
@@ -28,9 +29,10 @@ function App() {
         
         <Route path="/community/signin" element={<CommunitySignin/>}/>
         <Route path="/user/dashboard" element={<PrivateRoute><UserDashboard/></PrivateRoute>}/>
+        <Route path="/searched-quests" element={<PrivateRoute><SearchedQuest/></PrivateRoute>}/>       
         <Route path="/quest-details" element={<PrivateRoute><QuestDetails/></PrivateRoute>}/>
         <Route path="/community/dashboard" element={<AdminRoute><CommunityManagerDashboard/></AdminRoute>}/>
-
+        
       </Routes>
 
       {/* <Footer/> */}

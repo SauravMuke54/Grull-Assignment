@@ -1,15 +1,23 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { isAuthenticated } from '../../helper'
 import { signout } from '../../helper/signout'
 
 export default function Navbar() {
 
+    const [query,setQuery]=useState("")
+
     const navigate=useNavigate()
+
+    const goToRelevant=()=>{
+
+      navigate('/searched-quests', { state: { query: query }});
+
+    }
 
     useEffect(()=>{
 
-    },[isAuthenticated])
+    },[])
 
   return (
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
@@ -48,11 +56,11 @@ export default function Navbar() {
          
         
         </ul>
-        <form class="d-flex">
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
-          <button class="btn btn-outline-success" type="submit">Search</button>
-          {/* <button class="btn btn-outline-danger" type="submit">Join Now</button> */}
-        </form>
+       {isAuthenticated().data?.user?.role===0 && <div class="d-flex">
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"
+          value={query} onChange={e=>{setQuery(e.target.value)}}/>
+          <button class="btn btn-outline-success" type="submit" onClick={e=>{goToRelevant()}}>Search</button>
+        </div>}
       </div>
     </div>
   </nav>
